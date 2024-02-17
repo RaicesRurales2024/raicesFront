@@ -108,7 +108,7 @@ function NavBar() {
                                 </li>
                             </> ):( <> 
                                 <li><a href="Actividades"><b className='menu'>Inicio</b></a></li>
-                                <li><a href="Profile"><b className='menu'>Perfil</b></a></li>
+                                <li><a {...navigate('/DashboardAdmin')}><b className='menu'>Perfil</b></a></li>
                                 <li>
                                     <label className='labelcheck' htmlFor="menuCheckbox">
                                         <b className='menu'>
