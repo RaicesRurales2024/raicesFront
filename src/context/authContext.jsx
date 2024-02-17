@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { registerRequest, loginRequest, updateUserRequest } from '../api/auth.js'
-//import Cookies from 'js-cookie'
+import { registerRequest, loginRequest, updateUserRequest, verifyTokenRequest } from '../api/auth.js'
+import Cookies from 'js-cookie'
 
 const AuthContext = createContext();
 
@@ -17,6 +17,48 @@ export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [tokenUs, setTokenUs] = useState('');
+    
+
+
+    useEffect(()=>{
+        const cookieToken = Cookies.get('token');
+        if (cookieToken) {
+            setTokenUs(cookieToken);
+            localStorage.setItem('token', cookieToken);
+          }
+    }, []);
+
+    useEffect(()=>{
+        async function cargarUser(){
+            if(!tokenUs){
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const res = await verifyTokenRequest(tokenUs)
+                if (!res.data) {
+                    setIsAuthenticated(false);
+                    setLoading(false);
+                    return;
+                }
+                setIsAuthenticated(true);
+                console.log(res.data)
+                setUser(res.data);
+                setLoading(true);
+
+            } catch (error) {
+                console.log(error);
+                setIsAuthenticated(false);
+                setUser(null);
+                setLoading(false);
+            }
+        }
+
+        cargarUser();
+        
+    });
 
     const signup = async (user) => {
         try {
@@ -32,7 +74,7 @@ export const AuthProvider = ({ children }) => {
             const res = await loginRequest(user)
             console.log(res)
             setUser(res.data);
-            setIsAuthenticated(true)
+            setIsAuthenticated(true);
 
         } catch (error) {
             if (Array.isArray(error.response.data)) {
@@ -43,7 +85,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     const logout = (() => {
-        //Cookies.remove("token");
+        Cookies.remove("token");
         setIsAuthenticated(false);
         setUser(null)
     })
