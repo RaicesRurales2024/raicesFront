@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { registerRequest, loginRequest, updateUserRequest, verifyTokenRequest } from '../api/auth.js'
+import { registerRequest, loginRequest, verifyTokenRequest, updateUserRequest } from '../api/auth.js'
 import Cookies from 'js-cookie'
 
 const AuthContext = createContext();
@@ -18,47 +18,6 @@ export const AuthProvider = ({ children }) => {
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [tokenUs, setTokenUs] = useState('');
-    
-
-
-    useEffect(()=>{
-        const cookieToken = Cookies.get('token');
-        if (cookieToken) {
-            setTokenUs(cookieToken);
-            localStorage.setItem('token', cookieToken);
-          }
-    }, []);
-
-    useEffect(()=>{
-        async function cargarUser(){
-            if(!tokenUs){
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const res = await verifyTokenRequest(tokenUs)
-                if (!res.data) {
-                    setIsAuthenticated(false);
-                    setLoading(false);
-                    return;
-                }
-                setIsAuthenticated(true);
-                console.log(res.data)
-                setUser(res.data);
-                setLoading(true);
-
-            } catch (error) {
-                console.log(error);
-                setIsAuthenticated(false);
-                setUser(null);
-                setLoading(false);
-            }
-        }
-
-        cargarUser();
-        
-    });
 
     const signup = async (user) => {
         try {
@@ -74,7 +33,7 @@ export const AuthProvider = ({ children }) => {
             const res = await loginRequest(user)
             console.log(res)
             setUser(res.data);
-            setIsAuthenticated(true);
+            setIsAuthenticated(true)
 
         } catch (error) {
             if (Array.isArray(error.response.data)) {
@@ -104,9 +63,19 @@ export const AuthProvider = ({ children }) => {
         }
     }, [errors])
 
-    /*useEffect(() => {
+    useEffect(()=>{
+        const cookieToken = Cookies.get('token');
+        if (cookieToken) {
+            setTokenUs(cookieToken);
+            localStorage.setItem('token', cookieToken);
+          }
+    }, []);
+
+    useEffect(() => {
         async function checkLogin() {
             const cookies = Cookies.get();
+            console.log(cookies);
+
             if (!cookies.token) {
                 setIsAuthenticated(false);
                 setLoading(false);
@@ -114,7 +83,7 @@ export const AuthProvider = ({ children }) => {
             }
 
             try {
-                const res = await verifyTokenRequest(cookies.token)
+                const res = await verifyTokenRequest(tokenUs)
                 if (!res.data) {
                     setIsAuthenticated(false);
                     setLoading(false);
@@ -132,7 +101,7 @@ export const AuthProvider = ({ children }) => {
         }
         checkLogin();
     }, []);
-*/
+
 
     return (
         <AuthContext.Provider
