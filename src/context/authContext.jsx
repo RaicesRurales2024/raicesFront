@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { registerRequest, loginRequest, verifyTokenRequest, updateUserRequest } from '../api/auth.js'
-import Cookies from 'js-cookie'
+import Cookies from 'js-cookie';
 
 const AuthContext = createContext();
 
@@ -28,20 +28,29 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+
+
     const signin = async (user) => {
         try {
-            const res = await loginRequest(user)
-            console.log(res)
-            setUser(res.data);
-            setIsAuthenticated(true)
+            const res = await loginRequest(user);
+            console.log(res);
 
+            const token = res.data.token;
+            if (!token) {
+                throw new Error('El servidor no proporcionó un token válido');
+            }
+            Cookies.set('token', token);
+
+            setUser(res.data);
+            setIsAuthenticated(true);
         } catch (error) {
             if (Array.isArray(error.response.data)) {
-                return setErrors(error.response.data)
+                return setErrors(error.response.data);
             }
-            setErrors([error.response.data.message])
+            setErrors([error.response.data.message]);
         }
-    }
+    };
+
 
     const logout = (() => {
         Cookies.remove("token");
@@ -49,10 +58,10 @@ export const AuthProvider = ({ children }) => {
         setUser(null)
     })
 
-    const updateUser = async(id, user) =>{
+    const updateUser = async (id, user) => {
         const res = await updateUserRequest(id, user)
-     }
- 
+    }
+
 
     useEffect(() => {
         if (errors.length > 0) {
@@ -63,12 +72,12 @@ export const AuthProvider = ({ children }) => {
         }
     }, [errors])
 
-    useEffect(()=>{
+    useEffect(() => {
         const cookieToken = Cookies.get('token');
         if (cookieToken) {
             setTokenUs(cookieToken);
             localStorage.setItem('token', cookieToken);
-          }
+        }
     }, []);
 
     useEffect(() => {
