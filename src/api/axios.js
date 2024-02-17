@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const instance = axios.create({
     //baseURL:'http://localhost:3001',
-    baseURL: 'https://reliable-raindrop-840fbf.netlify.app',
+    baseURL: 'https://raicesrurales.netlify.app',
     
     withCredentials:true,
     
